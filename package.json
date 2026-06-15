@@ -1,0 +1,22 @@
+{
+  "name": "Samurai_Back",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Roman Karpeyev",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "watch": "tsc -w",
+    "dev": "nodemon --inspect ./dist/index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.9.3",
+    "nodemon": "^3.1.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
