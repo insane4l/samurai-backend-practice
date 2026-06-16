@@ -1,11 +1,11 @@
 import express from 'express';
 
-const app = express();
+export const app = express();
 const port = process.env.PORT || 3006;
 const JsonBodyMiddleware = express.json();
 app.use(JsonBodyMiddleware);
 
-const HTTP_STATUSES = {
+export const HTTP_STATUSES = {
     OK_200: 200,
     CREATED_201: 201,
     NO_CONTENT_204: 204,
@@ -90,6 +90,11 @@ app.put('/countries/:id', (req, res) => {
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
 });
 
+app.delete('/__test__/cleanup', (req, res) => {
+    DB.countries = [];
+
+    res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
+});
 
 
 
