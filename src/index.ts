@@ -1,7 +1,7 @@
 import express from 'express';
 
 const app = express();
-const port = 3006;
+const port = process.env.PORT || 3006;
 const JsonBodyMiddleware = express.json();
 app.use(JsonBodyMiddleware);
 
