@@ -1,5 +1,6 @@
 import request from 'supertest';
-import { app, HTTP_STATUSES } from '../../src';
+import { app, HTTP_STATUSES } from '../..';
+
 
 
 describe('/countries', () => {
@@ -31,6 +32,8 @@ describe('/countries', () => {
             .expect(HTTP_STATUSES.CREATED_201);
 
         const createdCountry = response.body;
+
+        console.log(createdCountry)
 
         expect(createdCountry).toEqual({
             id: expect.any(Number),
@@ -158,8 +161,8 @@ describe('/countries', () => {
             .expect(HTTP_STATUSES.OK_200, []);
     });
 
-        it('should return 404 when deleting a non-existent country', async () => {
-         const nonExistentId = 1;
+    it('should return 404 when deleting a non-existent country', async () => {
+        const nonExistentId = 1;
 
         await request(app)
             .delete(`/countries/${nonExistentId}`)

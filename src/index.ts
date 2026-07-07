@@ -1,6 +1,13 @@
-import express from 'express';
+import express, { Response, Express } from 'express';
+import { CountryType, RequestWithBody, RequestWithParams, RequestWithParamsAndBody, RequestWithQuery } from './types/types';
+import { QueryCountriesModel } from './models/QueryCountriesModel';
+import { URIParamsCountryIdModel } from './models/URIParamsCountryIdModel';
+import { CreateCountryModel } from './models/CreateCountryModel';
+import { CountryViewModel } from './models/CountryViewModel';
+import { UpdateCountryModel } from './models/UpdateCountryModel';
 
-export const app = express();
+
+export const app: Express = express();
 const port = process.env.PORT || 3006;
 const JsonBodyMiddleware = express.json();
 app.use(JsonBodyMiddleware);
@@ -15,73 +22,86 @@ export const HTTP_STATUSES = {
 
 const DB = {
     countries: [
-    {id: 1, name: 'Estonia'},
-    {id: 2, name: 'France'},
-    {id: 3, name: 'Azerbaijan'},
-    {id: 4, name: 'Turkey'},
-]};
+        { id: 1, name: 'Estonia', code: 'EE' },
+        { id: 2, name: 'France', code: 'FR' },
+        { id: 3, name: 'Azerbaijan', code: 'AZ' },
+        { id: 4, name: 'Turkey', code: 'TR' },
+    ]
+};
+
+const getCountryViewModel = (dbCountry: CountryType): CountryViewModel => {
+    return { id: dbCountry.id, name: dbCountry.name }
+}
 
 
-app.get('/countries', (req, res) => {
+app.get('/countries', (req: RequestWithQuery<QueryCountriesModel>, res: Response<CountryViewModel[]>) => {
     let foundCountries = DB.countries;
 
     if (req.query.name) {
         foundCountries = foundCountries.filter(c => c.name.indexOf(req.query.name as string) > -1)
     }
 
-    res.status(HTTP_STATUSES.OK_200).json(foundCountries);
+    res.status(HTTP_STATUSES.OK_200).json(foundCountries.map(getCountryViewModel));
 });
 
-app.get('/countries/:id', (req, res) => {
+app.get('/countries/:id', (req: RequestWithParams<URIParamsCountryIdModel>, res: Response<CountryViewModel>) => {
 
     const selectedCountry = DB.countries.find(c => c.id === +req.params.id);
 
     if (!selectedCountry) {
-         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
-         return;
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
+        return;
     }
 
-    res.status(HTTP_STATUSES.OK_200).json(selectedCountry);
+    res.status(HTTP_STATUSES.OK_200).json(getCountryViewModel(selectedCountry));
 });
 
 
-app.post('/countries', (req, res) => {
+app.post('/countries', (req: RequestWithBody<CreateCountryModel>, res: Response<CountryViewModel>) => {
 
     if (!req.body || !req.body.name) {
-         res.sendStatus(HTTP_STATUSES.VALIDATION_ERROR_422);
-         return;
+        res.sendStatus(HTTP_STATUSES.VALIDATION_ERROR_422);
+        return;
     }
 
     const newCountry = {
-        id: +(new Date()), 
+        id: +(new Date()),
         name: req.body.name,
+        code: 'TST' // todo; need to generate code in accordance with name value
     }
 
     DB.countries.push(newCountry);
 
     res
-    .status(HTTP_STATUSES.CREATED_201)
-    .json(newCountry);
+        .status(HTTP_STATUSES.CREATED_201)
+        .json(getCountryViewModel(newCountry));
 
 });
 
-app.delete('/countries/:id', (req, res) => {
+app.delete('/countries/:id', (req: RequestWithParams<URIParamsCountryIdModel>, res) => {
+    const selectedCountry = DB.countries.find(c => c.id === +req.params.id);
+
+    if (!selectedCountry) {
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
+        return;
+    }
+
     DB.countries = DB.countries.filter(c => c.id !== +req.params.id);
 
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
 });
 
-app.put('/countries/:id', (req, res) => {
+app.put('/countries/:id', (req: RequestWithParamsAndBody<URIParamsCountryIdModel, UpdateCountryModel>, res) => {
     if (!req.body || !req.body.name) {
-         res.sendStatus(HTTP_STATUSES.VALIDATION_ERROR_422);
-         return;
+        res.sendStatus(HTTP_STATUSES.VALIDATION_ERROR_422);
+        return;
     }
 
-        const selectedCountry = DB.countries.find(c => c.id === +req.params.id);
+    const selectedCountry = DB.countries.find(c => c.id === +req.params.id);
 
     if (!selectedCountry) {
-         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
-         return;
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
+        return;
     }
 
     selectedCountry.name = req.body.name;
