@@ -6,7 +6,7 @@ import { app, HTTP_STATUSES } from '../..';
 describe('/countries', () => {
 
     beforeEach(async () => {
-        await request(app).delete('/__test__/cleanup');
+        await request(app).delete('/countries/__test__/cleanup');
     });
 
     it('should return 200 and empty array', async () => {
