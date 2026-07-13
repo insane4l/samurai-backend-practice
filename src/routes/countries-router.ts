@@ -13,8 +13,15 @@ import { URIParamsCountryIdModel } from '../models/URIParamsCountryIdModel';
 import { CountryViewModel } from '../models/CountryViewModel';
 import { UpdateCountryModel } from '../models/UpdateCountryModel';
 import { countriesRepository } from '../repositories/countries-repository';
+import { body } from 'express-validator';
+import { inputValidationMiddleware } from '../middlewares/input-validation-middleware';
 
 export const countriesRouter: Router = Router({});
+
+const countryNameValidation = body('name')
+    .trim()
+    .isLength({ min: 2, max: 20 })
+    .withMessage('Country name should be min 2 and max 20 characters');
 
 countriesRouter.get(
     '/',
@@ -39,25 +46,22 @@ countriesRouter.get(
     },
 );
 
-countriesRouter.post('/', (req: RequestWithBody<CreateCountryModel>, res: Response) => {
-    if (!req.body || !req.body.name) {
-        res.sendStatus(HTTP_STATUSES.VALIDATION_ERROR_422);
-        return;
-    }
+countriesRouter.post(
+    '/',
+    countryNameValidation,
+    inputValidationMiddleware,
+    (req: RequestWithBody<CreateCountryModel>, res: Response) => {
+        const createdCountry = countriesRepository.createCountry(req.body.name);
 
-    const createdCountry = countriesRepository.createCountry(req.body.name);
-
-    res.status(HTTP_STATUSES.CREATED_201).json(createdCountry);
-});
+        res.status(HTTP_STATUSES.CREATED_201).json(createdCountry);
+    },
+);
 
 countriesRouter.put(
     '/:id',
+    countryNameValidation,
+    inputValidationMiddleware,
     (req: RequestWithParamsAndBody<URIParamsCountryIdModel, UpdateCountryModel>, res) => {
-        if (!req.body || !req.body.name) {
-            res.sendStatus(HTTP_STATUSES.VALIDATION_ERROR_422);
-            return;
-        }
-
         const isUpdated = countriesRepository.updateCountry(+req.params.id, req.body.name);
 
         if (!isUpdated) {
