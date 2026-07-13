@@ -1,5 +1,5 @@
 import express, { Response, Express } from 'express';
-import {countriesRouter} from "./routes/countries-router";
+import { countriesRouter } from './routes/countries-router';
 
 export const HTTP_STATUSES = {
     OK_200: 200,

@@ -1,3 +1,3 @@
 export type QueryCountriesModel = {
-    name: string
-}
+    name?: string;
+};
